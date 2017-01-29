@@ -1,0 +1,11 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Entity\\": ["example/Entity"],
+            "Doctrine\\": ["lib/"]
+        }
+    },
+    "require": {
+        "doctrine/orm": "^2.5"
+    }
+}
