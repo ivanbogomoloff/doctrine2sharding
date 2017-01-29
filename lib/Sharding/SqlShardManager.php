@@ -35,7 +35,7 @@ final class SqlShardManager implements ShardManager
 	 */
 	protected $entityManager = [
 		'global' => null,
-		'shards' => null
+		'shards' => []
 	];
 
 	/**
@@ -67,8 +67,7 @@ final class SqlShardManager implements ShardManager
 			throw new ShardingException("Entity manager configuration invalid instance");
 		}
 
-		$this->entityManager['global'] = EntityManager::create($this->connection, $emConf['global']);
-		$this->entityManager['shards'] = EntityManager::create($this->connection, $emConf['shards']);
+		$this->entityManager['global'] = EntityManager::create($conn, $emConf['global']);
 	}
 
 	/**
@@ -167,10 +166,29 @@ final class SqlShardManager implements ShardManager
 	}
 
 	/**
+	 * @param int $shardId - specify connection
 	 * @return EntityManager
 	 */
-	public function getEntityManager()
+	public function getEntityManager($shardId = null)
 	{
-		return $this->distributionValue === 0 ? $this->entityManager['global'] : $this->entityManager['shards'];
+		if(is_int($shardId))
+		{
+			$this->connection->connect($shardId);
+		}
+
+		if($this->distributionValue === 0)
+		{
+			return $this->entityManager['global'];
+		}
+
+		if(!isset($this->entityManager['shards'][$shardId]))
+		{
+			$this->entityManager['shards'][$shardId] = EntityManager::create(
+				$this->connection,
+				$this->emConfig['shards']
+			);
+		}
+
+		return $this->entityManager['shards'][$shardId];
 	}
 }
