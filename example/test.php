@@ -2,7 +2,15 @@
 
 require_once __DIR__ . '/boot.php';
 
+
 $manager = getShardManager();
-$manager->selectGlobal();
+
+$user = new \Entity\User();
+$user->setUserName('shard user');
+
 $manager->selectShard(1);
+$em = $manager->getEntityManager();
+
+//$em->persist($user);
+//$em->flush();
 

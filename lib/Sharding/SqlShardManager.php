@@ -4,11 +4,11 @@ namespace Doctrine\Sharding;
 
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Sharding\PoolingShardConnection;
+use Doctrine\DBAL\Sharding\ShardChoser\ShardChoser;
 use Doctrine\DBAL\Sharding\ShardingException;
 use Doctrine\DBAL\Sharding\ShardManager;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Tools\Setup;
 
 /**
  * Class ShardEntityManager
@@ -39,6 +39,11 @@ final class SqlShardManager implements ShardManager
 	];
 
 	/**
+	 * @var int
+	 */
+	protected $distributionValue;
+
+	/**
 	 * @param \Doctrine\DBAL\Driver\Connection $conn
 	 * @param array                            $emConf
 	 *
@@ -67,6 +72,14 @@ final class SqlShardManager implements ShardManager
 	}
 
 	/**
+	 * @return ShardChoser
+	 */
+	public function getShardChoser()
+	{
+		return $this->connection->getParams()['shardChoser'];
+	}
+
+	/**
 	 * Selects global database with global data.
 	 *
 	 * This is the default database that is connected when no shard is
@@ -76,7 +89,8 @@ final class SqlShardManager implements ShardManager
 	 */
 	function selectGlobal()
 	{
-		$this->connection->connect(0);
+		$this->distributionValue = 0;
+		$this->connect();
 	}
 
 	/**
@@ -90,7 +104,16 @@ final class SqlShardManager implements ShardManager
 	 */
 	function selectShard($distributionValue)
 	{
-		$this->connection->connect($distributionValue);
+		$this->distributionValue = $this->getShardChoser()->pickShard($distributionValue, $this->connection);
+		$this->connect();
+	}
+
+	/**
+	 * @throws \Doctrine\DBAL\Sharding\ShardingException
+	 */
+	private function connect()
+	{
+		$this->connection->connect($this->distributionValue);
 	}
 
 	/**
@@ -146,16 +169,8 @@ final class SqlShardManager implements ShardManager
 	/**
 	 * @return EntityManager
 	 */
-	public function getShardEntityManager()
-	{
-		return $this->entityManager['shards'];
-	}
-
-	/**
-	 * @return EntityManager
-	 */
 	public function getEntityManager()
 	{
-		return $this->entityManager['global'];
+		return $this->distributionValue === 0 ? $this->entityManager['global'] : $this->entityManager['shards'];
 	}
 }

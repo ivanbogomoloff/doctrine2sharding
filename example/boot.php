@@ -20,6 +20,10 @@ function getShardManager()
 	return $manager;
 }
 
+/**
+ * @return \Doctrine\DBAL\Connection
+ * @throws \Doctrine\DBAL\DBALException
+ */
 function getConnection()
 {
 	$conn = DriverManager::getConnection([
@@ -56,32 +60,18 @@ function getConnection()
 				'password' 	=> 'root',
 				'dbname' 	=> 'db4',
 				'host'     	=> '192.168.1.103'
+			],
+			[
+				'id'		=> 4,
+				'driver'   	=> 'pdo_mysql',
+				'username' 	=> 'root',
+				'password' 	=> 'root',
+				'dbname' 	=> 'db4',
+				'host'     	=> '192.168.1.103'
 			]
 		 ],
-		 'shardChoser' => 'Doctrine\DBAL\Sharding\ShardChoser\MultiTenantShardChoser',
+		 'shardChoser' => 'Doctrine\Sharding\SqlShardChoser',
 	 ]);
 
 	return $conn;
-}
-
-/**
- * @param null $shardId
- *
- * @return \Doctrine\ORM\EntityManager
- * @throws \Doctrine\ORM\ORMException
- */
-function getEntityManager($shardId = null)
-{
-	$conn 		= getConnection();
-
-	if($shardId)
-	{
-		$conn->connect($shardId);
-	}
-
-	$paths 		= [__DIR__ . '/Entity'];
-	$isDevMode 	= false;
-	$config 		= Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
-
-	return EntityManager::create($conn, $config);
 }
