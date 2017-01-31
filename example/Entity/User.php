@@ -18,27 +18,6 @@ class User {
 	 */
 	protected $userName;
 
-	/**
-	 * @var string
-	 * @Column(type="string", name="user_email")
-	 */
-	protected $userEmail;
-
-	/**
-	 * @return string
-	 */
-	public function getUserEmail()
-	{
-		return $this->userEmail;
-	}
-
-	/**
-	 * @param string $userEmail
-	 */
-	public function setUserEmail($userEmail)
-	{
-		$this->userEmail = $userEmail;
-	}
 
 	/**
 	 * @return mixed

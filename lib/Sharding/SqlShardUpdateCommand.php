@@ -85,7 +85,6 @@ EOT
 	{
 		// Defining if update is complete or not (--complete not defined means $saveMode = true)
 		$saveMode = ! $input->getOption('complete');
-
 		$sqls = $schemaTool->getUpdateSchemaSql($metadatas, $saveMode);
 
 		if (0 === count($sqls)) {

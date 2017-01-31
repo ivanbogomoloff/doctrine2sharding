@@ -2,6 +2,8 @@
 
 namespace Doctrine\Sharding;
 
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\ORM\Tools\Console\Command\SchemaTool\AbstractCommand;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\Console\Input\InputInterface;
@@ -51,6 +53,8 @@ abstract class AbstractShardingCommand extends AbstractCommand
 				$output->writeln('No Metadata Classes to process.');
 				$output->writeln('Go to next shard.');
 			}
+
+			//$sm->closeConnections();
 		}
 
 	}

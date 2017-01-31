@@ -173,6 +173,7 @@ final class SqlShardManager implements ShardManager
 	{
 		if(is_int($shardId))
 		{
+			$this->distributionValue = $shardId;
 			$this->connection->connect($shardId);
 		}
 
@@ -190,5 +191,13 @@ final class SqlShardManager implements ShardManager
 		}
 
 		return $this->entityManager['shards'][$shardId];
+	}
+
+	/**
+	 * @void
+	 */
+	public function closeConnections()
+	{
+		$this->connection->close();
 	}
 }

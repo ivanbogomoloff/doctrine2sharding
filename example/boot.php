@@ -60,14 +60,6 @@ function getConnection()
 				'password' 	=> 'root',
 				'dbname' 	=> 'db4',
 				'host'     	=> '192.168.1.103'
-			],
-			[
-				'id'		=> 4,
-				'driver'   	=> 'pdo_mysql',
-				'username' 	=> 'root',
-				'password' 	=> 'root',
-				'dbname' 	=> 'db4',
-				'host'     	=> '192.168.1.103'
 			]
 		 ],
 		 'shardChoser' => 'Doctrine\Sharding\SqlShardChoser',
