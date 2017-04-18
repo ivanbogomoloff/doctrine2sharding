@@ -32,6 +32,18 @@ abstract class AbstractShardingCommand extends AbstractCommand
 		$sm 	= $shardManagerHelper->getShardManager();
 		$shards = $sm->getShards();
 
+		$sm->selectGlobal();
+		$em 	   = $sm->getEntityManager();
+		$metadatas = $em->getMetadataFactory()->getAllMetadata();
+
+		if ( ! empty($metadatas)) {
+			$output->writeln("[start update for GLOBAL database]");
+			// Create SchemaTool
+			$tool = new SchemaTool($em);
+			$this->executeSchemaCommand($input, $output, $tool, $metadatas);
+			$output->writeln("<info>[success update global db]</info>");
+		}
+
 		if(empty($shards))
 		{
 			$output->writeln('No shards to process.');
@@ -45,10 +57,11 @@ abstract class AbstractShardingCommand extends AbstractCommand
 			$metadatas = $em->getMetadataFactory()->getAllMetadata();
 
 			if ( ! empty($metadatas)) {
+				$output->writeln("[start update for SHARD {$shardId}]");
 				// Create SchemaTool
 				$tool = new SchemaTool($em);
 				$this->executeSchemaCommand($input, $output, $tool, $metadatas);
-				$output->writeln("<info>Success process shard {$shardId}...</info>");
+				$output->writeln("<info>[success update shard {$shardId}]</info>");
 			} else {
 				$output->writeln('No Metadata Classes to process.');
 				$output->writeln('Go to next shard.');

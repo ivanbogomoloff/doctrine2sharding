@@ -11,8 +11,10 @@ use Doctrine\DBAL\DriverManager;
  */
 function getShardManager()
 {
-	$conn    = getConnection();
-	$manager = new \Doctrine\Sharding\SqlShardManager($conn, [
+	$conn    	= getConnection();
+	$globalConn = getConnection();
+
+	$manager = new \Doctrine\Sharding\SqlShardManager($conn, $globalConn, [
 			'global' => Setup::createAnnotationMetadataConfiguration([__DIR__ .'/Entity'], true),
 			'shards' => Setup::createAnnotationMetadataConfiguration([__DIR__ .'/Entity'], true)
 	]);
@@ -26,6 +28,7 @@ function getShardManager()
  */
 function getConnection()
 {
+	$host = '192.168.1.104';
 	$conn = DriverManager::getConnection([
 		 'wrapperClass' => 'Doctrine\DBAL\Sharding\PoolingShardConnection',
 		 'driver'       => 'pdo_mysql',
@@ -34,7 +37,7 @@ function getConnection()
 			 'username' => 'root',
 			 'password' => 'root',
 			 'dbname' 	=> 'db1',
-			 'host'     => '192.168.1.103'
+			 'host'     => $host
 		 ],
 		 'shards'       => [
 			[
@@ -43,7 +46,7 @@ function getConnection()
 				 'username' => 'root',
 				 'password' => 'root',
 				 'dbname' 	=> 'db2',
-				 'host'     => '192.168.1.103'
+				 'host'     => $host
 			 ],
 			[
 				'id'		=> 2,
@@ -51,7 +54,7 @@ function getConnection()
 				'username' 	=> 'root',
 				'password' 	=> 'root',
 				'dbname' 	=> 'db3',
-				'host'     	=> '192.168.1.103'
+				'host'     	=> $host
 			],
 			[
 				'id'		=> 3,
@@ -59,11 +62,12 @@ function getConnection()
 				'username' 	=> 'root',
 				'password' 	=> 'root',
 				'dbname' 	=> 'db4',
-				'host'     	=> '192.168.1.103'
+				'host'     	=> $host
 			]
 		 ],
 		 'shardChoser' => 'Doctrine\Sharding\SqlShardChoser',
 	 ]);
 
+	$conn->getConfiguration()->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
 	return $conn;
 }

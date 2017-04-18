@@ -22,6 +22,10 @@ final class SqlShardManager implements ShardManager
 	 */
 	protected $connection;
 	/**
+	 * @var Connection|PoolingShardConnection
+	 */
+	protected $globalConnection;
+	/**
 	 * @var array
 	 */
 	protected $emConfig = [
@@ -45,15 +49,17 @@ final class SqlShardManager implements ShardManager
 
 	/**
 	 * @param \Doctrine\DBAL\Driver\Connection $conn
+	 * @param \Doctrine\DBAL\Driver\Connection $globalConn
 	 * @param array                            $emConf
 	 *
 	 * @throws \Doctrine\DBAL\Sharding\ShardingException
+	 * @throws \Doctrine\ORM\ORMException
 	 */
-	public function __construct(Connection $conn, array $emConf = [])
+	public function __construct(Connection $conn, Connection $globalConn, array $emConf = [])
 	{
-		$this->connection = $conn;
-		$this->emConfig   = $emConf;
-
+		$this->connection 		= $conn;
+		$this->globalConnection = $globalConn;
+		$this->emConfig   		= $emConf;
 		if(!isset($emConf['global'])) {
 			throw new ShardingException("Entity manager configuration must be setup for global db");
 		}
@@ -67,7 +73,7 @@ final class SqlShardManager implements ShardManager
 			throw new ShardingException("Entity manager configuration invalid instance");
 		}
 
-		$this->entityManager['global'] = EntityManager::create($conn, $emConf['global']);
+		$this->entityManager['global'] = EntityManager::create($this->globalConnection, $emConf['global']);
 	}
 
 	/**
@@ -89,7 +95,7 @@ final class SqlShardManager implements ShardManager
 	function selectGlobal()
 	{
 		$this->distributionValue = 0;
-		$this->connect();
+		$this->globalConnection->connect(0);
 	}
 
 	/**
