@@ -80,23 +80,24 @@ $globalEm = $manager->getEntityManager();
 $manager->selectShard(1);
 $shardEm = $manager->getEntityManager();
 
-$globalEm->beginTransaction();
-$shardEm->beginTransaction();
+$globalEm->beginTransaction(); //START TRANSACTION on 192.168.1.104 host
+$shardEm->beginTransaction(); //START TRANSACTION on "same user" host
 try
 {
 	$user = new \Entity\User();
 	$user->setUserName('shard user');
 
 	$shardEm->persist($user);
-	$shardEm->flush();
+	$shardEm->flush(); //INSERT INTO users ...
+	
 	$userLog = new \Entity\Log();
 	$userLog->setLogId('logged');
 
 	$globalEm->persist($userLog);
-	$globalEm->flush();
-
-	$shardEm->commit();
-	$globalEm->commit();
+	$globalEm->flush(); //INSERT INTO user_logs ...
+        
+	$shardEm->commit(); //COMMIT on "same user" host
+	$globalEm->commit(); //COMMIT on 192.168.1.104 host
 }
 catch (\Exception $e)
 {
@@ -104,4 +105,8 @@ catch (\Exception $e)
 	$globalEm->rollback();
 	throw $e;
 }
+```
+# Command for update across all shards and global
+```php
+php bin/doctrine.php orm:sharding:schema-tool:update [--dump-sql|--force]
 ```
